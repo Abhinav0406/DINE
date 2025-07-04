@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Table } from '../types';
 import { supabase } from '../lib/supabase';
-import { Loader2, Users, Check, AlertCircle } from 'lucide-react';
+import { Loader2, Users, Check, AlertCircle, ChefHat } from 'lucide-react';
+import Lottie from 'lottie-react';
+import cookingAnimation from '../assets/lottie/cooking.json';
+import tableAnimation from '../assets/lottie/table.json';
 
 const TableSelectionPage: React.FC = () => {
   const navigate = useNavigate();
@@ -102,19 +105,21 @@ const TableSelectionPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700">
+    <div className="min-h-screen bg-background-light flex flex-col">
       {/* Header */}
-      <div className="bg-slate-900 shadow-sm border-b border-slate-800 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="text-center">
-            <h1 className="text-4xl font-extrabold text-white tracking-tight">Welcome to DINE+</h1>
-            <p className="mt-2 text-lg text-slate-300">Select your table to start your dining experience</p>
+      <div className="bg-primary-50 shadow-md border-b sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-center gap-6">
+          <a href="https://creamcentre.com/" target="_blank" rel="noopener noreferrer">
+            <img src="/images/cream-centre-logo.png" alt="Cream Centre Logo" className="h-16 w-auto" style={{filter: 'drop-shadow(0 2px 4px #daa52033)'}} />
+          </a>
+          <div className="w-16 h-16">
+            <Lottie animationData={cookingAnimation} loop={true} />
           </div>
         </div>
       </div>
 
       {/* Table Selection */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-2 py-6">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24">
             <Loader2 className="w-12 h-12 animate-spin text-primary-400 mb-4" />
@@ -138,30 +143,34 @@ const TableSelectionPage: React.FC = () => {
                   onClick={() => handleTableSelect(table)}
                   onKeyDown={e => isAvailable && (e.key === 'Enter' || e.key === ' ') && handleTableSelect(table)}
                   className={`
-                    bg-slate-800 rounded-2xl shadow-lg p-8 flex flex-col items-center border-2
-                    ${isAvailable ? 'hover:scale-105 hover:shadow-2xl cursor-pointer border-green-700' : 'opacity-60 cursor-not-allowed border-slate-700'}
-                    ${isSelected ? 'ring-4 ring-green-400 scale-105' : ''}
-                    focus:outline-none focus:ring-4 focus:ring-green-300
+                    bg-white rounded-xl shadow-sm p-8 flex flex-col items-center border border-gray-100
+                    ${isAvailable ? 'hover:scale-105 hover:shadow-lg cursor-pointer border-primary-200' : 'opacity-60 cursor-not-allowed border-gray-200'}
+                    ${isSelected ? 'ring-4 ring-primary-200 scale-105' : ''}
+                    focus:outline-none focus:ring-4 focus:ring-primary-100
                   `}
                 >
-                  <div className={`w-16 h-16 flex items-center justify-center rounded-full text-3xl font-bold mb-3
-                    ${isAvailable ? 'bg-green-900 text-green-200' : table.status === 'occupied' ? 'bg-red-900 text-red-200' : 'bg-yellow-900 text-yellow-200'}
-                  `}>
-                    {table.table_number}
+                  {/* Table Lottie Animation with Table Number Overlay */}
+                  <div className="relative w-20 h-20 flex items-center justify-center mb-3">
+                    <Lottie animationData={tableAnimation} loop={true} className="absolute inset-0 w-full h-full" />
+                    <span className={`absolute inset-0 flex items-center justify-center text-3xl font-bold drop-shadow-lg
+                      ${isAvailable ? 'text-primary-300' : table.status === 'occupied' ? 'text-red-200' : 'text-yellow-200'}
+                    `}>
+                      {table.table_number}
+                    </span>
                   </div>
-                  <div className="text-xl font-semibold text-white mb-1">Table {table.table_number}</div>
-                  <div className="flex items-center text-slate-300 mb-2">
+                  <div className="text-xl font-semibold text-primary-400 mb-1">Table {table.table_number}</div>
+                  <div className="flex items-center text-primary-900 mb-2">
                     <Users className="w-5 h-5 mr-1" />
                     {table.capacity} guests
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-medium mb-3
-                    ${table.status === 'available' ? 'bg-green-700 text-green-100' : table.status === 'occupied' ? 'bg-red-700 text-red-100' : 'bg-yellow-700 text-yellow-100'}
+                    ${table.status === 'available' ? 'bg-primary-100 text-primary-400 border border-primary-200' : table.status === 'occupied' ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-yellow-100 text-yellow-800 border border-yellow-200'}
                   `}>
                     {getStatusText(table.status)}
                   </span>
                   <button
                     className={`w-full py-2 rounded-lg font-semibold transition text-base mt-2
-                      ${isAvailable ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-slate-700 text-slate-400 cursor-not-allowed'}
+                      ${isAvailable ? 'bg-primary-200 text-primary-900 hover:bg-primary-300' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
                     `}
                     disabled={!isAvailable}
                     onClick={e => { e.stopPropagation(); if (isAvailable) handleTableSelect(table); }}
@@ -181,15 +190,15 @@ const TableSelectionPage: React.FC = () => {
 
         {/* Confirm Selection Bar */}
         {selectedTable && (
-          <div className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 shadow-2xl p-4 z-30 animate-fade-in">
+          <div className="fixed bottom-0 left-0 right-0 bg-primary-50 border-t border-primary-100 shadow-2xl p-4 z-30 animate-fade-in">
             <div className="max-w-md mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex-1 text-center sm:text-left">
-                <span className="block text-lg font-semibold text-green-300">Selected: Table {selectedTable.table_number}</span>
-                <span className="block text-sm text-slate-300">Capacity: {selectedTable.capacity} guests</span>
+                <span className="block text-lg font-semibold text-primary-400">Selected: Table {selectedTable.table_number}</span>
+                <span className="block text-sm text-primary-900">Capacity: {selectedTable.capacity} guests</span>
               </div>
               <button
                 onClick={handleConfirmSelection}
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-lg shadow-md transition-all w-full sm:w-auto mt-2 sm:mt-0"
+                className="bg-primary-200 hover:bg-primary-300 text-primary-900 font-bold py-3 px-8 rounded-lg text-lg shadow-md transition-all w-full sm:w-auto mt-2 sm:mt-0"
               >
                 Confirm & View Menu
               </button>
@@ -198,20 +207,20 @@ const TableSelectionPage: React.FC = () => {
         )}
 
         {/* Legend */}
-        <div className="mt-16 bg-slate-800 rounded-xl p-6 shadow-md max-w-2xl mx-auto">
-          <h3 className="text-lg font-semibold text-white mb-4">Table Status Legend</h3>
+        <div className="mt-16 bg-white rounded-xl p-6 shadow-md max-w-2xl mx-auto border border-gray-100">
+          <h3 className="text-lg font-semibold text-primary-400 mb-4">Table Status Legend</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-green-700 rounded-full mr-2"></div>
-              <span className="text-sm text-green-100">Available - Ready for booking</span>
+              <div className="w-4 h-4 bg-primary-100 border border-primary-200 rounded-full mr-2"></div>
+              <span className="text-sm text-primary-400">Available - Ready for booking</span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-red-700 rounded-full mr-2"></div>
-              <span className="text-sm text-red-100">Occupied - Currently in use</span>
+              <div className="w-4 h-4 bg-red-100 border border-red-200 rounded-full mr-2"></div>
+              <span className="text-sm text-red-700">Occupied - Currently in use</span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-yellow-700 rounded-full mr-2"></div>
-              <span className="text-sm text-yellow-100">Reserved - Temporarily held</span>
+              <div className="w-4 h-4 bg-yellow-100 border border-yellow-200 rounded-full mr-2"></div>
+              <span className="text-sm text-yellow-800">Reserved - Temporarily held</span>
             </div>
           </div>
         </div>

@@ -61,6 +61,7 @@ export interface MenuItem {
   created_at: string;
   updated_at: string;
   menu_categories?: MenuCategory;
+  is_featured?: boolean;
 }
 
 export interface Order {

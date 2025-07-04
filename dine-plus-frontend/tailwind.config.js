@@ -7,17 +7,20 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          50: '#f0fdf4',
-          100: '#dcfce7', 
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
+          50: '#f5f5dc',
+          100: '#fff8dc',
+          200: '#ffd700',
+          300: '#daa520',
+          400: '#8b0000',
+          500: '#a0522d',
+          600: '#f5f5f5',
+          700: '#e8e8e8',
+          800: '#d3d3d3',
+          900: '#2c2c2c',
         },
+        success: '#8fbc8f',
+        warning: '#ffc107',
+        error: '#dc3545',
         gray: {
           50: '#f9fafb',
           100: '#f3f4f6',
@@ -37,7 +40,8 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        serif: ['Playfair Display', 'serif'],
+        sans: ['Inter', 'Poppins', 'sans-serif'],
       },
       spacing: {
         '18': '4.5rem',

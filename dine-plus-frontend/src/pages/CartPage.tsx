@@ -131,7 +131,7 @@ const CartPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background-light">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white shadow-sm border-b sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -147,7 +147,6 @@ const CartPage: React.FC = () => {
                 <p className="text-sm text-gray-600">Table {currentTable.table_number}</p>
               </div>
             </div>
-            
             <button
               onClick={clearCart}
               className="text-red-600 hover:text-red-700 flex items-center text-sm"
@@ -159,132 +158,101 @@ const CartPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
-            {cart.map((item) => (
-              <div key={item.menu_item_id} className="card p-4">
-                <div className="flex items-start gap-4">
-                  {/* Image */}
-                  <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                    {item.image_url ? (
-                      <img
-                        src={item.image_url}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <CreditCard className="w-8 h-8" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Details */}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
-                    <p className="text-primary-600 font-medium">₹{item.price}</p>
-                    
-                    {item.special_instructions && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        Note: {item.special_instructions}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Quantity Controls */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center bg-gray-100 rounded-lg">
-                      <button
-                        onClick={() => updateCartItemQuantity(item.menu_item_id, item.quantity - 1)}
-                        className="p-2 text-gray-600 hover:bg-gray-200 rounded-l-lg"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <span className="px-3 py-2 text-gray-900 font-medium min-w-[3rem] text-center">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => updateCartItemQuantity(item.menu_item_id, item.quantity + 1)}
-                        className="p-2 text-gray-600 hover:bg-gray-200 rounded-r-lg"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
+      <div className="max-w-5xl mx-auto px-2 py-6 flex flex-col lg:flex-row gap-6">
+        {/* Cart Items */}
+        <div className="flex-1 w-full space-y-4">
+          {cart.map((item) => (
+            <div key={item.menu_item_id} className="card p-4">
+              <div className="flex items-start gap-4">
+                {/* Image */}
+                <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                  {item.image_url ? (
+                    <img
+                      src={item.image_url}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <CreditCard className="w-8 h-8" />
                     </div>
-                    
+                  )}
+                </div>
+                {/* Details */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
+                  <p className="text-primary-600 font-medium">₹{item.price}</p>
+                  {item.special_instructions && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      Note: {item.special_instructions}
+                    </p>
+                  )}
+                </div>
+                {/* Quantity Controls */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center bg-gray-100 rounded-lg">
                     <button
-                      onClick={() => removeFromCart(item.menu_item_id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                      onClick={() => updateCartItemQuantity(item.menu_item_id, item.quantity - 1)}
+                      className="px-2 py-1 text-primary-400 hover:bg-primary-100 rounded-l"
+                      disabled={item.quantity <= 1}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="px-3 py-1 text-primary-400 font-bold font-sans">{item.quantity}</span>
+                    <button
+                      onClick={() => updateCartItemQuantity(item.menu_item_id, item.quantity + 1)}
+                      className="px-2 py-1 text-primary-400 hover:bg-primary-100 rounded-r"
+                    >
+                      <Plus className="w-4 h-4" />
                     </button>
                   </div>
-
-                  {/* Item Total */}
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900">
-                      ₹{(item.price * item.quantity).toFixed(2)}
-                    </p>
-                  </div>
+                  <button
+                    onClick={() => removeFromCart(item.menu_item_id)}
+                    className="ml-2 text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-            ))}
-
-            {/* Special Instructions */}
-            <div className="card p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">Special Instructions</h3>
-              <textarea
-                value={specialInstructions}
-                onChange={(e) => setSpecialInstructions(e.target.value)}
-                placeholder="Any special requests or dietary requirements..."
-                className="input-field resize-none h-20"
-              />
             </div>
+          ))}
+        </div>
+        {/* Summary & Special Instructions */}
+        <div className="w-full lg:w-96 flex flex-col gap-6">
+          {/* Special Instructions */}
+          <div className="bg-white rounded-xl shadow-card p-4 border border-primary-100">
+            <h3 className="font-semibold text-primary-400 mb-2">Special Instructions</h3>
+            <textarea
+              className="w-full rounded-lg border border-primary-100 p-2 focus:ring-2 focus:ring-primary-200 focus:outline-none resize-none min-h-[60px]"
+              placeholder="Any special requests or dietary requirements..."
+              value={specialInstructions}
+              onChange={e => setSpecialInstructions(e.target.value)}
+            />
           </div>
-
           {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="card p-6 sticky top-6">
-              <h3 className="font-semibold text-gray-900 mb-4">Order Summary</h3>
-              
-              <div className="space-y-3 mb-4">
-                <div className="flex justify-between text-gray-600">
-                  <span>Subtotal ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
-                  <span>₹{cartTotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>Tax (18%)</span>
-                  <span>₹{tax.toFixed(2)}</span>
-                </div>
-                <div className="border-t pt-3">
-                  <div className="flex justify-between text-lg font-semibold text-gray-900">
-                    <span>Total</span>
-                    <span>₹{total.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {cart.length > 0 && (
-                <button
-                  onClick={handlePlaceOrder}
-                  className="btn-primary w-full py-3 text-lg flex items-center justify-center"
-                  disabled={loading}
-                >
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  {loading ? 'Placing Order...' : 'Place Order'}
-                </button>
-              )}
-
-              {/* Table Info */}
-              <div className="mt-4 p-3 bg-primary-50 rounded-lg">
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">Table:</span> {currentTable.table_number}
-                  <br />
-                  <span className="font-medium">Capacity:</span> {currentTable.capacity} guests
-                </p>
-              </div>
+          <div className="bg-primary-50 rounded-xl shadow-card p-4 border border-primary-100">
+            <h3 className="font-semibold text-primary-400 mb-2">Order Summary</h3>
+            <div className="flex justify-between text-gray-700 mb-1">
+              <span>Subtotal ({cart.length} {cart.length === 1 ? 'item' : 'items'})</span>
+              <span>₹{cartTotal.toFixed(2)}</span>
             </div>
+            <div className="flex justify-between text-gray-700 mb-1">
+              <span>Tax (18%)</span>
+              <span>₹{tax.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-lg font-bold text-primary-400 mt-2">
+              <span>Total</span>
+              <span>₹{total.toFixed(2)}</span>
+            </div>
+            {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
+            <button
+              onClick={handlePlaceOrder}
+              className="btn-primary w-full mt-4 flex items-center justify-center gap-2 text-lg py-3"
+              disabled={loading}
+            >
+              <CreditCard className="w-5 h-5" />
+              {loading ? 'Placing Order...' : 'Place Order'}
+            </button>
           </div>
         </div>
       </div>
