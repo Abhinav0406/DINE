@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { Clock, CheckCircle, Package, Utensils, ThumbsUp, CreditCard } from 'lucide-react';
+import { Clock, CheckCircle, Package, Utensils, ThumbsUp, CreditCard, Timer } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import Lottie from 'lottie-react';
+import deliveryAnimation from '../assets/lottie/loading-food.json';
 
 const OrderStatusPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
@@ -11,6 +13,8 @@ const OrderStatusPage: React.FC = () => {
   
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [order, setOrder] = useState<any>(null);
+  const [timeSaved, setTimeSaved] = useState<number | null>(null);
+  const [isEarlyDelivery, setIsEarlyDelivery] = useState(false);
 
   const fetchOrderStatus = async () => {
     const { data } = await supabase
@@ -18,7 +22,21 @@ const OrderStatusPage: React.FC = () => {
       .select('*')
       .eq('id', orderId)
       .single();
-    setOrder(data);
+    
+    if (data) {
+      setOrder(data);
+      
+      // Check if order was just served
+      if (data.status === 'served' && !timeSaved) {
+        const estimatedDeliveryTime = data.estimated_time * 60; // Convert to seconds
+        const actualDeliveryTime = Math.floor((Date.now() - new Date(data.created_at).getTime()) / 1000);
+        
+        if (actualDeliveryTime < estimatedDeliveryTime) {
+          setIsEarlyDelivery(true);
+          setTimeSaved(Math.floor((estimatedDeliveryTime - actualDeliveryTime) / 60)); // Convert to minutes
+        }
+      }
+    }
   };
 
   useEffect(() => {
@@ -27,10 +45,14 @@ const OrderStatusPage: React.FC = () => {
       return;
     }
 
-    // Start timer
-    const interval = setInterval(() => {
-      setTimeElapsed(prev => prev + 1);
-    }, 1000);
+    let interval: NodeJS.Timeout | null = null;
+
+    // Only start timer if order is not served
+    if (order?.status !== 'served') {
+      interval = setInterval(() => {
+        setTimeElapsed(prev => prev + 1);
+      }, 1000);
+    }
 
     fetchOrderStatus();
     const subscription = supabase
@@ -41,10 +63,25 @@ const OrderStatusPage: React.FC = () => {
       .subscribe();
 
     return () => {
-      clearInterval(interval);
+      if (interval) {
+        clearInterval(interval);
+      }
       supabase.removeChannel(subscription);
     };
-  }, [currentOrder, currentTable, navigate, orderId]);
+  }, [currentOrder, currentTable, navigate, orderId, order?.status]);
+
+  // Stop timer and calculate time saved when order becomes served
+  useEffect(() => {
+    if (order?.status === 'served') {
+      const estimatedDeliveryTime = order.estimated_time * 60; // Convert to seconds
+      const actualDeliveryTime = Math.floor((Date.now() - new Date(order.created_at).getTime()) / 1000);
+      
+      if (actualDeliveryTime < estimatedDeliveryTime) {
+        setIsEarlyDelivery(true);
+        setTimeSaved(Math.floor((estimatedDeliveryTime - actualDeliveryTime) / 60)); // Convert to minutes
+      }
+    }
+  }, [order?.status]);
 
   if (!currentOrder || !currentTable) {
     return null;
@@ -125,20 +162,47 @@ const OrderStatusPage: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Time Display */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center bg-white rounded-xl shadow-card p-6">
-            <Clock className="w-8 h-8 text-primary-600 mr-4" />
-            <div>
-              <p className="text-sm text-gray-600">
-                {timeRemaining > 0 ? 'Estimated time remaining' : 'Order should be ready'}
-              </p>
-              <p className="text-2xl font-bold text-gray-900">
-                {timeRemaining > 0 ? formatTime(timeRemaining) : 'Any moment now!'}
-              </p>
-              <p className="text-xs text-gray-500">
-                Time elapsed: {formatTime(timeElapsed)}
-              </p>
+          {order?.status === 'served' ? (
+            <div className="bg-white rounded-xl shadow-card p-6">
+              {isEarlyDelivery ? (
+                <div className="space-y-4">
+                  <div className="w-32 h-32 mx-auto">
+                    <Lottie animationData={deliveryAnimation} loop={false} />
+                  </div>
+                  <div className="text-green-600 font-semibold text-xl">
+                    Order Delivered Early! 🎉
+                  </div>
+                  <div className="text-gray-600">
+                    <p>We saved you {timeSaved} minutes</p>
+                    <p className="text-sm mt-1">Total time taken: {formatTime(timeElapsed)}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-green-600 mr-4" />
+                  <div>
+                    <p className="text-xl font-semibold text-gray-900">Order Delivered!</p>
+                    <p className="text-sm text-gray-600">Total time: {formatTime(timeElapsed)}</p>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          ) : (
+            <div className="inline-flex items-center bg-white rounded-xl shadow-card p-6">
+              <Clock className="w-8 h-8 text-primary-600 mr-4" />
+              <div>
+                <p className="text-sm text-gray-600">
+                  {timeRemaining > 0 ? 'Estimated time remaining' : 'Order should be ready'}
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {timeRemaining > 0 ? formatTime(timeRemaining) : 'Any moment now!'}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Time elapsed: {formatTime(timeElapsed)}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Status Steps */}
