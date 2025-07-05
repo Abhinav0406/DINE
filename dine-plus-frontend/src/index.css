@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap');
 
 @layer base {
   html {
@@ -72,4 +72,154 @@
     border-color: #ffd700;
     outline: none;
   }
+}
+
+.premium-sidebar-border {
+  border-right: 4px solid;
+  border-image: linear-gradient(180deg, #FFD700 0%, #FFF8DC 100%);
+  border-image-slice: 1;
+}
+.premium-sidebar-shadow {
+  box-shadow: 0 8px 32px 0 rgba(218, 165, 32, 0.18), 0 1.5px 8px 0 rgba(0,0,0,0.08);
+}
+.premium-sidebar-glow {
+  box-shadow: 0 0 24px 4px rgba(255, 215, 0, 0.12) inset, 0 8px 32px 0 rgba(218, 165, 32, 0.18);
+}
+.premium-category-btn {
+  font-family: 'Playfair Display', serif;
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+/* Premium Admin Dashboard Styles */
+.premium-header {
+  background: linear-gradient(90deg, #232526 0%, #3a2c60 60%, #C6A04A 100%);
+  color: #fff;
+  border-bottom: none;
+  box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.12);
+  position: relative;
+}
+.premium-header .premium-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
+  position: relative;
+  display: inline-block;
+}
+.premium-header .premium-title:after {
+  content: '';
+  display: block;
+  width: 60%;
+  height: 4px;
+  background: linear-gradient(90deg, #C6A04A 0%, #F5E6C0 100%);
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  margin-left: 0;
+}
+.premium-header {
+  box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.12), 0 2px 8px 0 rgba(255, 215, 0, 0.10);
+}
+
+.premium-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 2rem;
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.10), 0 2px 12px 0 rgba(255,215,0,0.10);
+  border: 2.5px solid #fff;
+  border-left: 6px solid #C6A04A;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.7s cubic-bezier(.4,2,.6,1);
+}
+.premium-card:before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 8px;
+  background: linear-gradient(180deg, #C6A04A 0%, #F5E6C0 100%);
+  border-radius: 2rem 0 0 2rem;
+  z-index: 1;
+}
+.premium-card .premium-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: #3a2c60;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.premium-btn {
+  background: linear-gradient(90deg, #C6A04A 0%, #F5E6C0 100%);
+  color: #232526;
+  border-radius: 9999px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px 0 rgba(198, 160, 74, 0.10);
+  border: 2px solid #F5E6C0;
+  padding: 0.5rem 1.5rem;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s, border 0.2s;
+  position: relative;
+}
+.premium-btn:hover, .premium-btn:focus {
+  background: linear-gradient(90deg, #F5E6C0 0%, #C6A04A 100%);
+  box-shadow: 0 4px 16px 0 rgba(198, 160, 74, 0.18);
+  border: 2px solid #C6A04A;
+  transform: scale(1.05);
+}
+.premium-btn:active {
+  box-shadow: 0 2px 8px 0 rgba(218, 165, 32, 0.20);
+  transform: scale(0.98);
+}
+
+.premium-table {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(31, 38, 135, 0.06);
+  font-family: 'Inter', 'Playfair Display', serif;
+  margin-bottom: 0;
+}
+.premium-table th, .premium-table td {
+  border: none;
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+}
+.premium-table th {
+  background: linear-gradient(90deg, #C6A04A 0%, #F5E6C0 100%);
+  color: #232526;
+  font-weight: 700;
+}
+.premium-table tr:nth-child(even) td {
+  background: #F5E6C0;
+}
+.premium-table tr:nth-child(odd) td {
+  background: #fff;
+}
+.premium-table tr:hover td {
+  background: #F9F3E3;
+  transition: background 0.2s;
+}
+
+.premium-stat-icon {
+  background: linear-gradient(135deg, #C6A04A 0%, #F5E6C0 100%);
+  color: #232526;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px 0 rgba(198, 160, 74, 0.10);
+  width: 3.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.premium-stat-icon:hover {
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 6px 24px 0 rgba(218, 165, 32, 0.18);
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 } 

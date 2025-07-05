@@ -179,4 +179,26 @@ router.get('/analytics/occupancy', async (req, res) => {
   }
 });
 
+// Reset all tables to available
+router.post('/reset-all', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('tables')
+      .update({ status: 'available' })
+      .neq('status', 'available')
+      .select();
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.json({
+      message: 'All tables reset to available successfully',
+      tables: data
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router; 

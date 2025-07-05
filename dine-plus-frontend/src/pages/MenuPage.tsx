@@ -114,16 +114,17 @@ const MenuPage: React.FC = () => {
       {/* Main Layout: Sidebar + Content */}
       <div className="flex flex-1 flex-row max-w-7xl mx-auto w-full px-2 py-2 gap-4">
         {/* Static Glassmorphic Sidebar for Categories (Desktop) */}
-        <div className="hidden lg:flex flex-col gap-4 w-56 pt-8 pl-4 pr-6 sticky top-24 max-h-[80vh] overflow-y-auto z-10" style={{marginLeft: '8px'}}>
-          <div className="backdrop-blur-xl bg-white/60 border-l-0 border-r-2 border-primary-200 shadow-lg rounded-3xl p-4 flex flex-col gap-3 h-full overflow-y-auto" style={{boxShadow: '0 4px 16px 0 rgba(31, 38, 135, 0.08)'}}>
+        <div className="hidden lg:flex flex-col gap-4 w-60 pt-8 pl-4 pr-6 sticky top-24 max-h-[80vh] overflow-y-auto z-20" style={{marginLeft: '8px'}}>
+          <div className="backdrop-blur-2xl bg-white/50 border-l-0 border-r-4 rounded-3xl p-5 flex flex-col gap-4 h-full overflow-y-auto premium-sidebar-border premium-sidebar-shadow premium-sidebar-glow">
             {menuCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-serif text-base border transition shadow-sm backdrop-blur-md w-full ${selectedCategory === cat.id ? 'bg-primary-100 border-primary-400 text-primary-900 scale-105 shadow-lg' : 'bg-white/70 border-primary-200 text-primary-400 hover:bg-primary-50'}`}
+                className={`flex items-center gap-3 px-5 py-3 rounded-2xl font-serif text-lg border-2 transition shadow-md w-full premium-category-btn ${selectedCategory === cat.id ? 'bg-gradient-to-r from-yellow-100 via-yellow-50 to-white border-yellow-400 text-yellow-700 scale-105 shadow-xl' : 'bg-white/60 border-yellow-200 text-primary-400 hover:bg-yellow-50 hover:border-yellow-400 hover:text-yellow-700'}`}
                 style={{transition: 'all 0.2s cubic-bezier(.4,2,.6,1)'}}
               >
-                <span className="truncate w-44 text-left">{cat.name}</span>
+                <span className="text-lg">🍽️</span>
+                <span className="truncate w-44 text-left font-semibold tracking-wide">{cat.name}</span>
               </button>
             ))}
           </div>
@@ -132,18 +133,20 @@ const MenuPage: React.FC = () => {
         {sidebarOpen && (
           <>
             <div className="fixed inset-0 z-40 bg-black bg-opacity-40 transition-opacity lg:hidden" onClick={() => setSidebarOpen(false)} />
-            <div className="fixed top-0 left-0 bottom-0 w-64 bg-white z-50 shadow-2xl flex flex-col gap-4 pt-8 px-6 transition-transform duration-300 lg:hidden animate-slide-in max-h-screen overflow-y-auto">
-              <button className="self-end mb-4 text-primary-400 hover:text-primary-600" onClick={() => setSidebarOpen(false)}>
+            <div className="fixed top-0 left-0 bottom-0 w-72 bg-white/60 z-50 shadow-2xl flex flex-col gap-4 pt-10 px-7 transition-transform duration-300 lg:hidden animate-slide-in max-h-screen overflow-y-auto premium-sidebar-border premium-sidebar-shadow premium-sidebar-glow backdrop-blur-2xl">
+              <button className="self-end mb-4 text-yellow-400 hover:text-yellow-600" onClick={() => setSidebarOpen(false)}>
                 <CloseIcon className="w-7 h-7" />
               </button>
-              <div className="flex flex-col gap-3 overflow-y-auto" style={{maxHeight: 'calc(100vh - 5rem)'}}>
+              <div className="flex flex-col gap-4 overflow-y-auto" style={{maxHeight: 'calc(100vh - 5rem)'}}>
                 {menuCategories.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => { setSelectedCategory(cat.id); setSidebarOpen(false); }}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-serif text-base border transition shadow-sm w-full ${selectedCategory === cat.id ? 'bg-primary-100 border-primary-400 text-primary-900 scale-105 shadow-lg' : 'bg-white border-primary-200 text-primary-400 hover:bg-primary-50'}`}
+                    className={`flex items-center gap-3 px-5 py-3 rounded-2xl font-serif text-lg border-2 transition shadow-md w-full premium-category-btn ${selectedCategory === cat.id ? 'bg-gradient-to-r from-yellow-100 via-yellow-50 to-white border-yellow-400 text-yellow-700 scale-105 shadow-xl' : 'bg-white/60 border-yellow-200 text-primary-400 hover:bg-yellow-50 hover:border-yellow-400 hover:text-yellow-700'}`}
+                    style={{transition: 'all 0.2s cubic-bezier(.4,2,.6,1)'}}
                   >
-                    <span className="truncate w-44 text-left">{cat.name}</span>
+                    <span className="text-lg">🍽️</span>
+                    <span className="truncate w-44 text-left font-semibold tracking-wide">{cat.name}</span>
                   </button>
                 ))}
               </div>

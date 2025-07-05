@@ -5,6 +5,7 @@ import { useStore } from './store/useStore';
 // Pages
 import TableSelectionPage from './pages/TableSelectionPage';
 import MenuPage from './pages/MenuPage';
+import StagedMenuPage from './pages/StagedMenuPage';
 import CartPage from './pages/CartPage';
 import OrderStatusPage from './pages/OrderStatusPage';
 import PaymentPage from './pages/PaymentPage';
@@ -50,6 +51,7 @@ function App() {
             <Route path="/" element={<Navigate to="/tables" replace />} />
             <Route path="/tables" element={<TableSelectionPage />} />
             <Route path="/menu" element={<MenuPage />} />
+            <Route path="/staged-menu" element={<StagedMenuPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/payment/:orderId" element={<PaymentPage />} />
             <Route path="/order-status/:orderId" element={<OrderStatusPage />} />

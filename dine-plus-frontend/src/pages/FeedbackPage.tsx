@@ -58,6 +58,13 @@ const FeedbackPage: React.FC = () => {
         alert('Failed to submit feedback. Please try again.');
         return;
       }
+
+      // Ensure table is marked as available
+      await supabase
+        .from('tables')
+        .update({ status: 'available' })
+        .eq('id', currentTable.id);
+
       // On success, navigate to thank you
       navigate('/thank-you');
     } catch (error) {
@@ -68,27 +75,60 @@ const FeedbackPage: React.FC = () => {
     }
   };
 
-  const StarRating: React.FC<{
+  const handleSkipFeedback = async () => {
+    try {
+      // Ensure table is marked as available even when skipping feedback
+      if (currentTable?.id) {
+        await supabase
+          .from('tables')
+          .update({ status: 'available' })
+          .eq('id', currentTable.id);
+      }
+    } catch (error) {
+      console.error('Error updating table status:', error);
+    } finally {
+      navigate('/thank-you');
+    }
+  };
+
+  const emojiList = [
+    { emoji: '😡', label: 'Very Bad' },
+    { emoji: '😕', label: 'Bad' },
+    { emoji: '😐', label: 'Okay' },
+    { emoji: '🙂', label: 'Good' },
+    { emoji: '😍', label: 'Excellent' },
+  ];
+
+  const EmojiRating: React.FC<{
     rating: number;
     onRatingChange: (rating: number) => void;
     label: string;
   }> = ({ rating, onRatingChange, label }) => (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-700">{label}</label>
-      <div className="flex space-x-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            onClick={() => onRatingChange(star)}
-            className={`p-1 rounded transition-colors ${
-              star <= rating ? 'text-yellow-400' : 'text-gray-300 hover:text-yellow-300'
-            }`}
-          >
-            <Star className="w-8 h-8 fill-current" />
-          </button>
-        ))}
+      <div className="flex space-x-2 justify-center">
+        {emojiList.map((item, idx) => {
+          const value = idx + 1;
+          return (
+            <button
+              key={item.emoji}
+              type="button"
+              onClick={() => onRatingChange(value)}
+              className={`transition-transform duration-150 focus:outline-none text-3xl select-none ${
+                value === rating
+                  ? 'scale-125 animate-bounce'
+                  : 'hover:scale-110'
+              }`}
+              aria-label={item.label}
+            >
+              <span role="img" aria-label={item.label}>{item.emoji}</span>
+            </button>
+          );
+        })}
       </div>
+      {rating > 0 && (
+        <div className="text-center text-sm text-primary-400 mt-1">{emojiList[rating-1].label}</div>
+      )}
     </div>
   );
 
@@ -115,7 +155,7 @@ const FeedbackPage: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-900">Overall Experience</h2>
             </div>
             
-            <StarRating
+            <EmojiRating
               rating={ratings.overall}
               onRatingChange={(rating) => handleRatingChange('overall', rating)}
               label="How would you rate your overall experience?"
@@ -127,19 +167,19 @@ const FeedbackPage: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Tell us more</h3>
             
             <div className="space-y-6">
-              <StarRating
+              <EmojiRating
                 rating={ratings.food}
                 onRatingChange={(rating) => handleRatingChange('food', rating)}
                 label="Food Quality"
               />
               
-              <StarRating
+              <EmojiRating
                 rating={ratings.service}
                 onRatingChange={(rating) => handleRatingChange('service', rating)}
                 label="Service"
               />
               
-              <StarRating
+              <EmojiRating
                 rating={ratings.ambiance}
                 onRatingChange={(rating) => handleRatingChange('ambiance', rating)}
                 label="Ambiance"
@@ -206,7 +246,7 @@ const FeedbackPage: React.FC = () => {
           <div className="text-center">
             <button
               type="button"
-              onClick={() => navigate('/thank-you')}
+              onClick={handleSkipFeedback}
               className="text-gray-500 hover:text-gray-700 text-sm"
             >
               Skip feedback

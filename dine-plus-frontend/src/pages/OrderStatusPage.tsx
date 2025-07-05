@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { Clock, CheckCircle, Package, Utensils, ThumbsUp } from 'lucide-react';
+import { Clock, CheckCircle, Package, Utensils, ThumbsUp, CreditCard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const OrderStatusPage: React.FC = () => {
@@ -214,12 +214,14 @@ const OrderStatusPage: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4">
-          {order?.status === 'served' && (
+          {/* Show payment button only when order is served and not paid */}
+          {order?.status === 'served' && order?.payment_status !== 'completed' && (
             <button
-              onClick={() => navigate(`/feedback/${order.id}`)}
-              className="btn-primary flex-1"
+              onClick={() => navigate(`/payment/${order.id}`)}
+              className="btn-primary flex-1 flex items-center justify-center gap-2"
             >
-              Rate Your Experience
+              <CreditCard className="w-5 h-5" />
+              Make Payment
             </button>
           )}
           
@@ -238,13 +240,14 @@ const OrderStatusPage: React.FC = () => {
           </button>
         </div>
 
-        {order?.status === 'served' && (
-          <button
-            onClick={() => navigate(`/payment/${order.id}`)}
-            className="btn-primary mt-6"
-          >
-            Proceed to Payment
-          </button>
+        {/* Payment Status Banner */}
+        {order?.status === 'served' && order?.payment_status !== 'completed' && (
+          <div className="mt-6 p-4 rounded-lg bg-yellow-50 text-yellow-700">
+            <div className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              <span>Your order has been served. Please proceed to make payment.</span>
+            </div>
+          </div>
         )}
 
         {/* Help Section */}

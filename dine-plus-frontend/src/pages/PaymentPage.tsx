@@ -62,7 +62,19 @@ const PaymentPage: React.FC = () => {
   }, [orderId]);
 
   if (!order) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-background-light flex items-center justify-center">
+        <div className="card p-6 text-center">
+          <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading order details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentTable) {
+    navigate('/table-selection');
+    return null;
   }
 
   // Calculate totals from order items
@@ -107,9 +119,14 @@ const PaymentPage: React.FC = () => {
         .insert({
           table_id: currentTable.id,
           status: 'pending',
+          status_text: 'pending',
           total_amount: cartTotal,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          special_instructions: JSON.stringify({
+            is_staged_order: false,
+            timestamp: new Date().toISOString()
+          })
         })
         .select()
         .single();
@@ -161,33 +178,46 @@ const PaymentPage: React.FC = () => {
       name: 'DINE+ Restaurant',
       description: `Order #${order.order_number}`,
       handler: async function (response) {
-        // On successful payment, update order in Supabase
-        await supabase
-          .from('orders')
-          .update({
-            payment_status: 'completed',
-            payment_method: selectedPaymentMethod,
-            status: 'completed',
-            updated_at: new Date().toISOString(),
-            razorpay_payment_id: response.razorpay_payment_id,
-          })
-          .eq('id', orderId);
+        try {
+          // On successful payment, update order in Supabase
+          await supabase
+            .from('orders')
+            .update({
+              payment_status: 'completed',
+              payment_method: selectedPaymentMethod,
+              updated_at: new Date().toISOString(),
+              razorpay_payment_id: response.razorpay_payment_id,
+            })
+            .eq('id', orderId);
 
-        // Insert payment record for analytics
-        await supabase.from('payments').insert([
-          {
-            order_id: orderId,
-            amount: total,
-            payment_method: selectedPaymentMethod,
-            razorpay_payment_id: response.razorpay_payment_id,
-            status: 'success',
-            created_at: new Date().toISOString(),
-          },
-        ]);
+          // Insert payment record for analytics
+          await supabase.from('payments').insert([
+            {
+              order_id: orderId,
+              amount: total,
+              payment_method: selectedPaymentMethod,
+              razorpay_payment_id: response.razorpay_payment_id,
+              status: 'success',
+              created_at: new Date().toISOString(),
+            },
+          ]);
 
-        // Redirect to feedback page
-        navigate(`/feedback/${orderId}`);
-        setLoading(false);
+          // Update table status to available since order is complete
+          if (currentTable?.id) {
+            await supabase
+              .from('tables')
+              .update({ status: 'available' })
+              .eq('id', currentTable.id);
+          }
+
+          // Redirect to feedback page
+          navigate(`/feedback/${orderId}`);
+        } catch (error) {
+          console.error('Error in payment completion:', error);
+          setError('Payment completed but failed to update order status. Please contact staff.');
+        } finally {
+          setLoading(false);
+        }
       },
       prefill: {
         name: '',
@@ -247,23 +277,28 @@ const PaymentPage: React.FC = () => {
                         selectedPaymentMethod === method.id
                           ? 'border-primary-500 bg-primary-50'
                           : 'border-gray-200 hover:border-gray-300'
-                      } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''} hover:shadow-md`}
                     >
                       <div className="flex items-center">
                         <div className={`w-12 h-12 rounded-lg ${method.bgColor} flex items-center justify-center mr-4`}>
                           <Icon className={`w-6 h-6 ${method.color}`} />
                         </div>
-                        <div className="text-left">
+                        <div className="text-left flex-1">
                           <h3 className="font-semibold text-gray-900">{method.name}</h3>
                           <p className="text-sm text-gray-600">{method.description}</p>
                         </div>
                         {selectedPaymentMethod === method.id && (
-                          <CheckCircle className="w-6 h-6 text-primary-600 ml-auto" />
+                          <CheckCircle className="w-6 h-6 text-primary-600 ml-4" />
                         )}
                       </div>
                     </button>
                   );
                 })}
+                {error && (
+                  <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg">
+                    {error}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -272,28 +307,118 @@ const PaymentPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
               <div className="mb-2 text-sm text-gray-600">
                 <div>Order #: <span className="font-medium text-gray-900">{order.order_number}</span></div>
-                <div>Table: <span className="font-medium text-gray-900">{order.table_id}</span></div>
+                <div>Table: <span className="font-medium text-gray-900">{currentTable?.table_number}</span></div>
                 <div>Status: <span className="font-medium text-gray-900 capitalize">{order.status}</span></div>
               </div>
-              <div className="space-y-3">
-                {order.order_items?.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center py-2">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{item.menu_items?.name || 'Item'}</h4>
-                      <p className="text-sm text-gray-600">Qty: {item.quantity} × ₹{item.menu_items?.price?.toFixed(2) ?? item.unit_price?.toFixed(2) ?? '0.00'}</p>
-                    </div>
-                    <span className="font-medium text-gray-900">
-                      ₹{(item.total_price || (item.menu_items?.price || 0) * item.quantity).toFixed(2)}
-                    </span>
-                  </div>
-                ))}
+
+              {/* Group items by stage for staged orders */}
+              <div className="space-y-4">
+                {(() => {
+                  // Check if this is a staged order by examining special_instructions
+                  let isStagedOrder = false;
+                  let stageGroups = {
+                    starters: [],
+                    main_course: [],
+                    desserts: []
+                  };
+
+                  try {
+                    const orderMetadata = JSON.parse(order.special_instructions || '{}');
+                    isStagedOrder = orderMetadata.is_staged_order === true;
+                  } catch (e) {
+                    // Not a staged order
+                  }
+
+                  if (isStagedOrder) {
+                    // Group items by stage
+                    order.order_items?.forEach(item => {
+                      try {
+                        const itemMetadata = JSON.parse(item.special_instructions || '{}');
+                        const stage = itemMetadata.stage || 'starters';
+                        if (stageGroups[stage]) {
+                          stageGroups[stage].push(item);
+                        }
+                      } catch (e) {
+                        stageGroups.starters.push(item);
+                      }
+                    });
+
+                    const stageLabels = {
+                      starters: '🥗 Starters & Appetizers',
+                      main_course: '🍽️ Main Course',
+                      desserts: '🍰 Desserts & Treats'
+                    };
+
+                    return Object.entries(stageGroups).map(([stage, items]) => {
+                      if (items.length === 0) return null;
+                      
+                      return (
+                        <div key={stage} className="border-l-4 border-primary-200 pl-4">
+                          <h4 className="font-medium text-primary-600 mb-2">
+                            {stageLabels[stage]}
+                          </h4>
+                          <div className="space-y-2">
+                            {items.map((item) => (
+                              <div key={item.id} className="flex justify-between items-center py-1">
+                                <div className="flex-1">
+                                  <span className="font-medium text-gray-900">{item.menu_items?.name || 'Item'}</span>
+                                  <span className="text-sm text-gray-600 ml-2">
+                                    {item.quantity} × ₹{item.unit_price?.toFixed(2) ?? '0.00'}
+                                  </span>
+                                </div>
+                                <span className="font-medium text-gray-900">
+                                  ₹{item.total_price?.toFixed(2) ?? '0.00'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }).filter(Boolean);
+                  } else {
+                    // Regular order display
+                    return (
+                      <div className="space-y-3">
+                        {order.order_items?.map((item) => (
+                          <div key={item.id} className="flex justify-between items-center py-2">
+                            <div className="flex-1">
+                              <h4 className="font-medium text-gray-900">{item.menu_items?.name || 'Item'}</h4>
+                              <p className="text-sm text-gray-600">
+                                Qty: {item.quantity} × ₹{item.unit_price?.toFixed(2) ?? '0.00'}
+                              </p>
+                            </div>
+                            <span className="font-medium text-gray-900">
+                              ₹{item.total_price?.toFixed(2) ?? '0.00'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
+                })()}
               </div>
-              {order.special_instructions && (
-                <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-                  <h4 className="font-medium text-gray-900 mb-1">Special Instructions:</h4>
-                  <p className="text-sm text-gray-700">{order.special_instructions}</p>
-                </div>
-              )}
+
+              {/* Show special instructions if any (excluding staged order metadata) */}
+              {(() => {
+                try {
+                  const metadata = JSON.parse(order.special_instructions || '{}');
+                  if (metadata.is_staged_order) {
+                    return null; // Don't show metadata as special instructions
+                  }
+                } catch (e) {
+                  // Show as regular special instructions
+                }
+                
+                if (order.special_instructions) {
+                  return (
+                    <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
+                      <h4 className="font-medium text-gray-900 mb-1">Special Instructions:</h4>
+                      <p className="text-sm text-gray-700">{order.special_instructions}</p>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
 

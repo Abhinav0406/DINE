@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import Lottie from 'lottie-react';
 import loadingFoodAnimation from '../assets/lottie/loading-food.json';
 
@@ -14,12 +14,22 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'md', text = 'Pr
     lg: 'w-40 h-40'
   };
 
+  const lottieRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (lottieRef.current) {
+      lottieRef.current.setSpeed(0.5);
+    }
+  }, []);
+
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full min-h-screen">
+    <div className="fixed inset-0 z-50 flex items-center justify-center w-full h-full min-h-screen bg-black/30 backdrop-blur-md">
+      <div className="flex flex-col items-center justify-center">
       <div className={sizeClasses[size] + ' mb-4'}>
-        <Lottie animationData={loadingFoodAnimation} loop={true} />
+          <Lottie lottieRef={lottieRef} animationData={loadingFoodAnimation} loop={true} />
+        </div>
+        {text && <p className="text-gray-100 text-lg font-medium drop-shadow-lg">{text}</p>}
       </div>
-      {text && <p className="text-gray-500 text-lg font-medium">{text}</p>}
     </div>
   );
 };

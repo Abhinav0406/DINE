@@ -4,6 +4,13 @@
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Drop and recreate order_status enum type
+DO $$ BEGIN
+    DROP TYPE IF EXISTS order_status CASCADE;
+EXCEPTION
+    WHEN undefined_object THEN null;
+END $$;
+
 -- Create custom types
 DO $$ BEGIN
     CREATE TYPE user_role AS ENUM ('customer', 'staff', 'admin', 'kitchen_staff');
@@ -12,7 +19,7 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE order_status AS ENUM ('pending', 'preparing', 'ready', 'served', 'completed', 'cancelled');
+    CREATE TYPE order_status AS ENUM ('staged', 'pending', 'preparing', 'ready', 'served', 'completed', 'cancelled');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;

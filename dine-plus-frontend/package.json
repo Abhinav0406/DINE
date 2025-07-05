@@ -6,6 +6,7 @@
   "homepage": ".",
   "dependencies": {
     "@supabase/supabase-js": "^2.50.0",
+    "axios": "^1.10.0",
     "chart.js": "^4.5.0",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.365.0",

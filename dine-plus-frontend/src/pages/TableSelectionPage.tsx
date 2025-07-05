@@ -152,11 +152,6 @@ const TableSelectionPage: React.FC = () => {
                   {/* Table Lottie Animation with Table Number Overlay */}
                   <div className="relative w-20 h-20 flex items-center justify-center mb-3">
                     <Lottie animationData={tableAnimation} loop={true} className="absolute inset-0 w-full h-full" />
-                    <span className={`absolute inset-0 flex items-center justify-center text-3xl font-bold drop-shadow-lg
-                      ${isAvailable ? 'text-primary-300' : table.status === 'occupied' ? 'text-red-200' : 'text-yellow-200'}
-                    `}>
-                      {table.table_number}
-                    </span>
                   </div>
                   <div className="text-xl font-semibold text-primary-400 mb-1">Table {table.table_number}</div>
                   <div className="flex items-center text-primary-900 mb-2">
@@ -191,17 +186,43 @@ const TableSelectionPage: React.FC = () => {
         {/* Confirm Selection Bar */}
         {selectedTable && (
           <div className="fixed bottom-0 left-0 right-0 bg-primary-50 border-t border-primary-100 shadow-2xl p-4 z-30 animate-fade-in">
-            <div className="max-w-md mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex-1 text-center sm:text-left">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-4">
                 <span className="block text-lg font-semibold text-primary-400">Selected: Table {selectedTable.table_number}</span>
                 <span className="block text-sm text-primary-900">Capacity: {selectedTable.capacity} guests</span>
               </div>
-              <button
-                onClick={handleConfirmSelection}
-                className="bg-primary-200 hover:bg-primary-300 text-primary-900 font-bold py-3 px-8 rounded-lg text-lg shadow-md transition-all w-full sm:w-auto mt-2 sm:mt-0"
-              >
-                Confirm & View Menu
-              </button>
+              
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Choose Your Ordering Experience</h3>
+                <p className="text-sm text-gray-600">Select how you'd like to order your meal</p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  onClick={handleConfirmSelection}
+                  className="bg-blue-100 hover:bg-blue-200 border border-blue-200 text-blue-800 font-medium py-4 px-6 rounded-lg shadow-md transition-all"
+                >
+                  <div className="text-left">
+                    <div className="font-semibold mb-1">🍽️ Regular Menu</div>
+                    <div className="text-sm opacity-90">Browse all items and order freely</div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => {
+                    if (selectedTable) {
+                      setCurrentTable({ ...selectedTable, status: 'reserved' });
+                      navigate('/staged-menu');
+                    }
+                  }}
+                  className="bg-purple-100 hover:bg-purple-200 border border-purple-200 text-purple-800 font-medium py-4 px-6 rounded-lg shadow-md transition-all"
+                >
+                  <div className="text-left">
+                    <div className="font-semibold mb-1">🥗 Staged Ordering</div>
+                    <div className="text-sm opacity-90">Progressive course-by-course ordering</div>
+                  </div>
+                </button>
+              </div>
             </div>
           </div>
         )}

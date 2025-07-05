@@ -64,13 +64,29 @@ export interface MenuItem {
   is_featured?: boolean;
 }
 
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  menu_item_id: string;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  special_instructions: string | null;
+  order_stage?: string; // 'starters', 'main_course', 'desserts'
+  created_at: string;
+  menu_items?: MenuItem;
+}
+
 export interface Order {
   id: string;
   restaurant_id: string;
   customer_id: string | null;
   table_id: string | null;
   order_number: string;
-  status: 'pending' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
+  status: 'staged' | 'pending' | 'preparing' | 'ready' | 'served' | 'completed' | 'cancelled';
+  status_text?: string;
+  order_stage?: string; // 'starters', 'main_course', 'desserts', 'finalized'
+  is_finalized?: boolean;
   subtotal: number;
   tax_amount: number;
   total_amount: number;
@@ -82,18 +98,6 @@ export interface Order {
   updated_at: string;
   order_items?: OrderItem[];
   tables?: Table;
-}
-
-export interface OrderItem {
-  id: string;
-  order_id: string;
-  menu_item_id: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
-  special_instructions: string | null;
-  created_at: string;
-  menu_items?: MenuItem;
 }
 
 export interface Feedback {
@@ -134,6 +138,9 @@ export interface StoreState {
   cart: CartItem[];
   cartTotal: number;
   
+  // Staged ordering state
+  stagedOrder: StagedOrderState;
+  
   // Loading states
   loading: boolean;
   error: string | null;
@@ -158,6 +165,17 @@ export interface StoreState {
   setMenuItems: (items: MenuItem[]) => void;
   setTables: (tables: Table[]) => void;
   setOrders: (orders: Order[]) => void;
+
+  // Staged ordering actions
+  initializeStagedOrder: (tableId: string) => Promise<void>;
+  addToStage: (stage: OrderStage, item: CartItem) => void;
+  removeFromStage: (stage: OrderStage, menuItemId: string) => void;
+  updateStageItemQuantity: (stage: OrderStage, menuItemId: string, quantity: number) => void;
+  clearStage: (stage: OrderStage) => void;
+  moveToNextStage: () => Promise<void>;
+  moveToPreviousStage: () => void;
+  finalizeOrder: () => Promise<void>;
+  resetStagedOrder: () => void;
 }
 
 // API Response Types
@@ -192,4 +210,31 @@ export interface TableOccupancy {
   occupied: number;
   reserved: number;
   occupancy_rate: string;
+}
+
+// New types for staged ordering
+export type OrderStage = 'starters' | 'main_course' | 'desserts' | 'finalized';
+
+export interface StagedOrderState {
+  currentStage: OrderStage;
+  sessionOrderId: string | null;
+  stageItems: {
+    starters: CartItem[];
+    main_course: CartItem[];
+    desserts: CartItem[];
+  };
+  completedStages: OrderStage[];
+  isFinalized: boolean;
+}
+
+export interface StageCategory {
+  stage: OrderStage;
+  categoryIds: string[];
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export interface StagedMenuItem extends MenuItem {
+  stage: OrderStage;
 } 
