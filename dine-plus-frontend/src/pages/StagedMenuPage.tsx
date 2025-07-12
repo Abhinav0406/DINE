@@ -4,7 +4,6 @@ import { useStore } from '../store/useStore';
 import { MenuItem, OrderStage } from '../types';
 import { supabase } from '../lib/supabase';
 import { 
-  ShoppingCart, 
   Plus, 
   Minus, 
   ChefHat, 
@@ -12,14 +11,11 @@ import {
   Cookie, 
   ArrowRight, 
   ArrowLeft,
-  Check,
   CreditCard,
   Leaf,
   Flame,
   Star,
-  Clock,
   Search,
-  Filter,
   Menu as MenuIcon,
   X as CloseIcon
 } from 'lucide-react';
@@ -88,8 +84,8 @@ const StagedMenuPage: React.FC = () => {
     updateStageItemQuantity,
     moveToNextStage,
     moveToPreviousStage,
-    finalizeOrder,
-    resetStagedOrder
+    finalizeOrder
+
   } = useStore();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('');

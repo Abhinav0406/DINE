@@ -162,7 +162,7 @@ const CartPage: React.FC = () => {
         {/* Cart Items */}
         <div className="flex-1 w-full space-y-4">
           {cart.map((item) => (
-            <div key={item.menu_item_id} className="card p-4">
+            <div key={item.menu_item_id} className="enhanced-cart-item card p-4">
               <div className="flex items-start gap-4">
                 {/* Image */}
                 <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
@@ -190,18 +190,18 @@ const CartPage: React.FC = () => {
                 </div>
                 {/* Quantity Controls */}
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center bg-gray-100 rounded-lg">
+                  <div className="quantity-control enhanced-cart-controls">
                     <button
                       onClick={() => updateCartItemQuantity(item.menu_item_id, item.quantity - 1)}
-                      className="px-2 py-1 text-primary-400 hover:bg-primary-100 rounded-l"
+                      className="quantity-btn"
                       disabled={item.quantity <= 1}
                     >
                       <Minus className="w-4 h-4" />
                     </button>
-                    <span className="px-3 py-1 text-primary-400 font-bold font-sans">{item.quantity}</span>
+                    <span className="quantity-display">{item.quantity}</span>
                     <button
                       onClick={() => updateCartItemQuantity(item.menu_item_id, item.quantity + 1)}
-                      className="px-2 py-1 text-primary-400 hover:bg-primary-100 rounded-r"
+                      className="quantity-btn"
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -247,11 +247,20 @@ const CartPage: React.FC = () => {
             {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
             <button
               onClick={handlePlaceOrder}
-              className="btn-primary w-full mt-4 flex items-center justify-center gap-2 text-lg py-3"
+              className={`enhanced-place-order-btn w-full mt-4 flex items-center justify-center gap-2 text-lg py-3 ${loading ? 'loading' : ''}`}
               disabled={loading}
             >
-              <CreditCard className="w-5 h-5" />
-              {loading ? 'Placing Order...' : 'Place Order'}
+              {loading ? (
+                <>
+                  <div className="loading-spinner"></div>
+                  Placing Order...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-5 h-5" />
+                  Place Order
+                </>
+              )}
             </button>
           </div>
         </div>

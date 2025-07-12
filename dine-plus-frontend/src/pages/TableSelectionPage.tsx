@@ -143,9 +143,9 @@ const TableSelectionPage: React.FC = () => {
                   onClick={() => handleTableSelect(table)}
                   onKeyDown={e => isAvailable && (e.key === 'Enter' || e.key === ' ') && handleTableSelect(table)}
                   className={`
-                    bg-white rounded-xl shadow-sm p-8 flex flex-col items-center border border-gray-100
-                    ${isAvailable ? 'hover:scale-105 hover:shadow-lg cursor-pointer border-primary-200' : 'opacity-60 cursor-not-allowed border-gray-200'}
-                    ${isSelected ? 'ring-4 ring-primary-200 scale-105' : ''}
+                    enhanced-table-card bg-white rounded-xl shadow-sm p-8 flex flex-col items-center border border-gray-100
+                    ${isAvailable ? 'available cursor-pointer border-primary-200' : 'unavailable cursor-not-allowed border-gray-200'}
+                    ${isSelected ? 'selected' : ''}
                     focus:outline-none focus:ring-4 focus:ring-primary-100
                   `}
                 >
