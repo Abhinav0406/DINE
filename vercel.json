@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "dine-plus-frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dine-plus-frontend/build" }
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
