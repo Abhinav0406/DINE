@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { StoreState, CartItem, User, Table, Order, MenuCategory, MenuItem, OrderStage, StagedOrderState } from '../types';
-import { supabase } from '../lib/supabase';
+import { StoreState, CartItem, User, Table, Order, MenuCategory, MenuItem, OrderStage } from '../types';
+// import { supabase } from '../lib/supabase';
 
 // Separate the store into persisted and non-persisted parts
 const useStore = create<StoreState>()(

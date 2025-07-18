@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Order, OrderItem, MenuItem, Table } from '../../types';
+// import { Order, OrderItem, MenuItem, Table } from '../../types';
 import { Clock, Package, Utensils, CheckCircle, Bell } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
